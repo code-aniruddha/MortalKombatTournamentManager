@@ -7,48 +7,39 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
+        // Mortal Kombat Theme Colors
+        obsidian: {
+          DEFAULT: '#0D0D0D',
+          light: '#1A1A1A',
         },
-        accent: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+        blood: {
+          DEFAULT: '#8B0000',
+          light: '#A50000',
+          dark: '#6B0000',
         },
-        dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
+        soul: {
+          DEFAULT: '#00FF41',
+          light: '#33FF66',
+          dark: '#00CC34',
+        },
+        gold: {
+          DEFAULT: '#C5A059',
+          light: '#D4B16F',
+          dark: '#B08F48',
+        },
+        text: {
+          DEFAULT: '#E0E0E0',
+          muted: '#B0B0B0',
         },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Bebas Neue', 'Impact', 'sans-serif'],
-      },
-    },
+      },      boxShadow: {
+        'blood': '0 0 20px rgba(139, 0, 0, 0.5)',
+        'soul': '0 0 20px rgba(0, 255, 65, 0.5)',
+        'gold': '0 0 20px rgba(197, 160, 89, 0.5)',
+      },    },
   },
   plugins: [],
 }

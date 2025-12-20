@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaTrophy, FaPlayCircle, FaFastForward, FaUsers } from 'react-icons/fa';
 import { getMatches, getPlayers, reportMatchResult } from '../lib/api';
 import { subscribeToMatches } from '../lib/supabase';
+import LoadingScreen from './LoadingScreen';
+import PlayerManagement from './PlayerManagement';
 import type { Match, Player } from '../lib/tournamentEngine';
 
 interface BracketViewProps {
@@ -19,6 +23,7 @@ export default function BracketView({ tournamentId }: BracketViewProps) {
   const [loading, setLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<MatchWithPlayers | null>(null);
   const [simulating, setSimulating] = useState(false);
+  const [showPlayerManagement, setShowPlayerManagement] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -239,11 +244,11 @@ export default function BracketView({ tournamentId }: BracketViewProps) {
             .sort(([a], [b]) => a - b)
             .map(([roundNum, roundMatches]) => (
               <div key={roundNum} className="flex-shrink-0 w-72">
-                <div className="bg-dark-800 border border-dark-700 rounded-lg px-4 py-2 mb-4 text-center">
+                <div className="glass-strong rounded-lg px-4 py-2 mb-4 text-center border border-gold/30">
                   <h3 className="text-white font-bold text-lg">
                     Round {roundNum}
                   </h3>
-                  <div className="text-dark-400 text-xs mt-1">
+                  <div className="text-text-muted text-xs mt-1">
                     {roundMatches.filter(m => m.winner_id).length} / {roundMatches.length} complete
                   </div>
                 </div>
@@ -310,22 +315,34 @@ export default function BracketView({ tournamentId }: BracketViewProps) {
             )}
           </div>
 
-          {/* Simulation Controls */}
-          <div className="flex justify-center gap-4">
-            <button
+          {/* Controls */}
+          <div className="flex justify-center gap-4 flex-wrap">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowPlayerManagement(true)}
+              className="btn-secondary text-sm inline-flex items-center gap-2"
+            >
+              <FaUsers /> Manage Players
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={simulateNextMatch}
               disabled={simulating}
-              className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
-              {simulating ? '⏳ Simulating...' : '🎲 Simulate Next Match'}
-            </button>
-            <button
+              {simulating ? '⏳ Simulating...' : '🎲 Simulate Next'}
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={simulateAll}
               disabled={simulating}
-              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
               {simulating ? '⏳ Running...' : '⚡ Auto-Simulate All'}
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -341,54 +358,119 @@ export default function BracketView({ tournamentId }: BracketViewProps) {
           ...getMatchesByBracket('GrandFinalsReset'),
         ])}
 
-        {/* Match Result Modal */}
-        {selectedMatch && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="card border-4 border-primary-500 max-w-lg w-full shadow-2xl shadow-primary-900/50 animate-scale-in">
-              <h2 className="font-display text-3xl font-bold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-400">
-                REPORT RESULT
-              </h2>
-
-              <div className="mb-8">
-                <div className="bg-dark-900 rounded-lg p-4 mb-6 text-center border border-dark-700">
-                  <p className="text-dark-400 text-sm mb-1">
-                    {selectedMatch.bracket_type} Bracket
-                  </p>
-                  <p className="text-white font-semibold">
-                    Round {selectedMatch.round_number} \u2022 Match {selectedMatch.match_order + 1}
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <button
-                    onClick={() =>
-                      handleReportResult(selectedMatch.id, selectedMatch.player1_id!)
-                    }
-                    className="w-full p-5 bg-gradient-to-r from-primary-600 to-primary-700 border-2 border-primary-500 rounded-lg text-white hover:from-primary-500 hover:to-primary-600 transition-all font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95"
-                  >
-                    🏆 {selectedMatch.player1?.name} WINS
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleReportResult(selectedMatch.id, selectedMatch.player2_id!)
-                    }
-                    className="w-full p-5 bg-gradient-to-r from-primary-600 to-primary-700 border-2 border-primary-500 rounded-lg text-white hover:from-primary-500 hover:to-primary-600 transition-all font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95"
-                  >
-                    🏆 {selectedMatch.player2?.name} WINS
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedMatch(null)}
-                className="w-full py-3 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition-all border border-dark-600"
+        {/* Match Result Modal - Improved */}
+        <AnimatePresence>
+          {selectedMatch && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => setSelectedMatch(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 50 }}
+                className="card border-4 border-blood max-w-xl w-full shadow-2xl"
+                style={{ boxShadow: '0 0 60px rgba(139, 0, 0, 0.6)' }}
+                onClick={(e) => e.stopPropagation()}
               >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+                <h2
+                  className="text-4xl font-bold text-center mb-6 text-blood"
+                  style={{
+                    fontFamily: 'Bebas Neue, sans-serif',
+                    letterSpacing: '0.1em',
+                    textShadow: '0 0 30px rgba(139, 0, 0, 0.8)'
+                  }}
+                >
+                  SELECT WINNER
+                </h2>
+
+                <div className="mb-8">
+                  <div
+                    className="rounded-lg p-4 mb-6 text-center border-2 border-gold/30 glass-strong"
+                  >
+                    <p className="text-gold text-sm mb-1 font-semibold" style={{ fontFamily: 'Bebas Neue, sans-serif' }}>
+                      {selectedMatch.bracket_type} Bracket
+                    </p>
+                    <p className="text-text font-semibold text-lg">
+                      Round {selectedMatch.round_number} • Match {selectedMatch.match_order + 1}
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <motion.button
+                      whileHover={{ scale: 1.03, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleReportResult(selectedMatch.id, selectedMatch.player1_id!)}
+                      className="w-full p-6 rounded-xl text-white transition-all font-bold text-xl relative overflow-hidden group"
+                      style={{
+                        background: 'linear-gradient(135deg, #8B0000, #C5A059)',
+                        border: '2px solid #8B0000',
+                        boxShadow: '0 4px 20px rgba(139, 0, 0, 0.5)',
+                        fontFamily: 'Bebas Neue, sans-serif',
+                        letterSpacing: '0.05em'
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+                      <div className="relative flex items-center justify-center gap-3">
+                        <FaTrophy className="text-gold text-2xl" />
+                        <span>{selectedMatch.player1?.name} WINS</span>
+                        <FaTrophy className="text-gold text-2xl" />
+                      </div>
+                    </motion.button>
+
+                    <div className="text-center text-text-muted font-bold" style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.1em' }}>VS</div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.03, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleReportResult(selectedMatch.id, selectedMatch.player2_id!)}
+                      className="w-full p-6 rounded-xl text-white transition-all font-bold text-xl relative overflow-hidden group"
+                      style={{
+                        background: 'linear-gradient(135deg, #8B0000, #C5A059)',
+                        border: '2px solid #8B0000',
+                        boxShadow: '0 4px 20px rgba(139, 0, 0, 0.5)',
+                        fontFamily: 'Bebas Neue, sans-serif',
+                        letterSpacing: '0.05em'
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+                      <div className="relative flex items-center justify-center gap-3">
+                        <FaTrophy className="text-gold text-2xl" />
+                        <span>{selectedMatch.player2?.name} WINS</span>
+                        <FaTrophy className="text-gold text-2xl" />
+                      </div>
+                    </motion.button>
+                  </div>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedMatch(null)}
+                  className="w-full py-3 bg-obsidian-light text-text rounded-lg hover:bg-blood hover:text-white transition-all border border-obsidian-light font-semibold"
+                >
+                  Cancel
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Player Management Modal */}
+        <AnimatePresence>
+          {showPlayerManagement && (
+            <PlayerManagement
+              tournamentId={tournamentId}
+              onClose={() => {
+                setShowPlayerManagement(false);
+                loadData(); // Reload data after closing
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

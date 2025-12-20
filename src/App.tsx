@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { FaTrophy, FaTrash, FaPlus } from 'react-icons/fa';
+import { GiGamepad } from 'react-icons/gi';
 import TournamentSetup from './components/TournamentSetup';
 import BracketView from './components/BracketView';
+import PS5ControllerBackground from './components/PS5ControllerBackground';
+import LoadingScreen from './components/LoadingScreen';
 import { listTournaments, deleteTournament } from './lib/api';
 import type { Tournament } from './lib/tournamentEngine';
 
@@ -8,6 +13,7 @@ function App() {
   const [currentView, setCurrentView] = useState<'home' | 'setup' | 'bracket'>('home');
   const [currentTournamentId, setCurrentTournamentId] = useState<string | null>(null);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (currentView === 'home') {
@@ -16,8 +22,10 @@ function App() {
   }, [currentView]);
 
   const loadTournaments = async () => {
+    setIsLoading(true);
     const { tournaments } = await listTournaments();
     setTournaments(tournaments);
+    setIsLoading(false);
   };
 
   const handleTournamentCreated = (tournamentId: string) => {
@@ -53,155 +61,287 @@ function App() {
 
   if (currentView === 'bracket' && currentTournamentId) {
     return (
-      <div className="min-h-screen bg-dark-950">
-        <div className="bg-dark-900 p-6 border-b border-dark-800 shadow-lg">
-          <div className="max-w-7xl mx-auto">
-            <button
-              onClick={handleBackToHome}
-              className="btn-secondary"
-            >
-              ← Back to Tournaments
-            </button>
-          </div>
+      <>
+        <PS5ControllerBackground />
+        <div className="min-h-screen relative z-10">
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="p-6 border-b border-blood/30 shadow-lg backdrop-blur-sm"
+            style={{ background: 'rgba(26, 26, 26, 0.8)' }}
+          >
+            <div className="max-w-7xl mx-auto">
+              <button
+                onClick={handleBackToHome}
+                className="btn-secondary"
+              >
+                ← Back to Tournaments
+              </button>
+            </div>
+          </motion.div>
+          <BracketView tournamentId={currentTournamentId} />
         </div>
-        <BracketView tournamentId={currentTournamentId} />
-      </div>
+      </>
     );
   }
 
   // Home View
   return (
-    <div className="min-h-screen bg-dark-950">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-dark-900 via-primary-950 to-dark-950 py-24 px-8 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNGgybDJ2LTJoLTJ2Mnptb C0ydjJoMnYtMmgtMnptLTItNGg0djRoLTR2LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
-        <div className="relative z-10">
-          <h1 className="font-display text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-primary-400 to-accent-500 mb-6 tracking-tight drop-shadow-2xl animate-pulse">
-            MORTAL KOMBAT
-          </h1>
-          <p className="font-display text-4xl text-accent-400 mb-8 tracking-wider">TOURNAMENT MANAGER</p>
-          <div className="h-1.5 w-64 bg-gradient-to-r from-transparent via-primary-500 to-transparent mx-auto mb-8 rounded-full"></div>
-          <p className="text-dark-300 text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
-            Double Elimination Tournament System • Real-Time Updates • Grand Finals Reset
-          </p>
-
-          <button
-            onClick={() => setCurrentView('setup')}
-            className="btn-primary text-xl px-16 py-5"
+    <>
+      <PS5ControllerBackground />
+      {isLoading && <LoadingScreen />}
+      <div className="min-h-screen relative z-10">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="py-24 px-8 text-center relative overflow-hidden backdrop-blur-sm"
+          style={{ background: 'rgba(13, 13, 13, 0.3)' }}
+        >
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
           >
-            CREATE NEW TOURNAMENT
-          </button>
-        </div>
-      </div>
+            <h1
+              className="text-9xl font-black mb-6 tracking-tight"
+              style={{
+                fontFamily: 'Bebas Neue, sans-serif',
+                color: '#8B0000',
+                textShadow: '0 0 40px rgba(139, 0, 0, 0.8), 0 0 80px rgba(139, 0, 0, 0.5)'
+              }}
+            >
+              MORTAL KOMBAT
+            </h1>
+          </motion.div>
 
-      {/* Recent Tournaments */}
-      <div className="max-w-7xl mx-auto px-8 py-16">
-        <h2 className="font-display text-4xl font-bold text-white mb-8">Recent Tournaments</h2>
+          <motion.p
+            initial={{ y: -30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-5xl mb-8"
+            style={{
+              fontFamily: 'Bebas Neue, sans-serif',
+              color: '#C5A059',
+              letterSpacing: '0.15em'
+            }}
+          >
+            TOURNAMENT MANAGER
+          </motion.p>
+
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="h-1 w-80 mx-auto mb-8 rounded-full"
+            style={{
+              background: 'linear-gradient(90deg, transparent, #00FF41, transparent)',
+              boxShadow: '0 0 20px #00FF41'
+            }}
+          />
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+            className="text-text-muted text-lg max-w-2xl mx-auto mb-12 leading-relaxed"
+          >
+            Double Elimination Tournament System • Real-Time Updates • Grand Finals Reset
+          </motion.p>
+
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 1, type: "spring", stiffness: 200 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setCurrentView('setup')}
+            className="btn-primary text-xl px-16 py-5 inline-flex items-center gap-3"
+          >
+            <FaPlus /> CREATE NEW TOURNAMENT
+          </motion.button>
+        </motion.div>
+
+        {/* Recent Tournaments */}
+        <div className="max-w-7xl mx-auto px-8 py-16">
+          <motion.h2
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-4xl font-bold text-text mb-8 flex items-center gap-3"
+            style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+          >
+            <FaTrophy className="text-gold" /> Recent Tournaments
+          </motion.h2>
 
         {tournaments.length === 0 ? (
-          <div className="card p-16 text-center">
-            <div className="text-6xl mb-6">🎮</div>
-            <p className="text-dark-400 text-xl mb-2">No tournaments yet</p>
-            <p className="text-dark-500">Create your first tournament to get started!</p>
-          </div>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="card p-16 text-center"
+          >
+            <GiGamepad className="text-8xl text-blood mx-auto mb-6" />
+            <p className="text-text text-xl mb-2">No tournaments yet</p>
+            <p className="text-text-muted">Create your first tournament to get started!</p>
+          </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tournaments.map((tournament) => (
-              <div
+            {tournaments.map((tournament, index) => (
+              <motion.div
                 key={tournament.id}
-                className="card group cursor-pointer hover:border-accent-500 hover:shadow-xl hover:shadow-accent-900/20 transition-all duration-300 relative"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="card group cursor-pointer transition-all duration-300 relative"
                 onClick={() => handleViewTournament(tournament.id)}
               >
                 <button
                   onClick={(e) => handleDeleteTournament(tournament.id, e)}
-                  className="absolute top-4 right-4 text-dark-500 hover:text-primary-500 transition-colors z-10"
+                  className="absolute top-4 right-4 text-text-muted hover:text-blood transition-colors z-10"
                   title="Delete tournament"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <FaTrash className="w-4 h-4" />
                 </button>
 
                 <div className="flex items-start justify-between mb-4 pr-8">
-                  <h3 className="text-xl font-bold text-white group-hover:text-primary-400 transition-colors">
+                  <h3
+                    className="text-xl font-bold text-text group-hover:text-blood transition-colors"
+                    style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+                  >
                     {tournament.name}
                   </h3>
-                  <div className="text-2xl">🏆</div>
+                  <FaTrophy className="text-2xl text-gold" />
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-dark-400 text-sm">Status</span>
+                    <span className="text-text-muted text-sm">Status</span>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-bold ${
                         tournament.status === 'Completed'
-                          ? 'bg-green-500/20 text-green-400'
+                          ? 'bg-soul/20 text-soul border border-soul/30'
                           : tournament.status === 'In-Progress'
-                          ? 'bg-accent-500/20 text-accent-400'
-                          : 'bg-primary-500/20 text-primary-400'
+                          ? 'bg-gold/20 text-gold border border-gold/30'
+                          : 'bg-blood/20 text-blood border border-blood/30'
                       }`}
                     >
                       {tournament.status}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-dark-400 text-sm">Fighters</span>
-                    <span className="text-white font-semibold text-lg">{tournament.participant_count}</span>
+                    <span className="text-text-muted text-sm">Fighters</span>
+                    <span className="text-text font-semibold text-lg">{tournament.participant_count}</span>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-dark-700 flex items-center justify-between">
-                    <span className="text-accent-500 text-sm font-medium group-hover:text-accent-400 transition-colors">
+                  <div className="mt-4 pt-4 border-t border-obsidian-light/50 flex items-center justify-between">
+                    <span className="text-soul text-sm font-medium group-hover:text-soul-light transition-colors">
                       View Bracket →
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
       </div>
 
       {/* Features Section */}
-      <div className="bg-gradient-to-b from-dark-900 to-dark-950 py-20 px-8">
+      <div className="py-20 px-8 backdrop-blur-sm" style={{ background: 'rgba(26, 26, 26, 0.5)' }}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-display text-4xl font-bold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-600">
+          <motion.h2
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-5xl font-bold text-center mb-4 text-gold"
+            style={{
+              fontFamily: 'Bebas Neue, sans-serif',
+              letterSpacing: '0.1em',
+              textShadow: '0 0 30px rgba(197, 160, 89, 0.5)'
+            }}
+          >
             Tournament Features
-          </h2>
-          <p className="text-center text-dark-400 mb-16 text-lg">Everything you need for professional tournament management</p>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center text-text-muted mb-16 text-lg"
+          >
+            Everything you need for professional tournament management
+          </motion.p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card text-center group hover:border-primary-500 transition-all">
-              <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">🏆</div>
-              <h3 className="text-2xl font-bold text-white mb-3 font-display">Double Elimination</h3>
-              <p className="text-dark-400 leading-relaxed">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              className="card text-center group"
+            >
+              <FaTrophy className="text-6xl mb-6 text-gold mx-auto group-hover:scale-110 transition-transform" />
+              <h3
+                className="text-2xl font-bold text-text mb-3"
+                style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+              >
+                Double Elimination
+              </h3>
+              <p className="text-text-muted leading-relaxed">
                 Every fighter gets a second chance. Winners and Losers brackets ensure fair competition.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="card text-center group hover:border-accent-500 transition-all">
-              <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">⚡</div>
-              <h3 className="text-2xl font-bold text-white mb-3 font-display">Real-Time Updates</h3>
-              <p className="text-dark-400 leading-relaxed">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+              className="card text-center group"
+            >
+              <div className="text-6xl mb-6 text-soul mx-auto group-hover:scale-110 transition-transform" style={{ textShadow: '0 0 20px #00FF41' }}>⚡</div>
+              <h3
+                className="text-2xl font-bold text-text mb-3"
+                style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+              >
+                Real-Time Updates
+              </h3>
+              <p className="text-text-muted leading-relaxed">
                 Powered by Supabase Realtime. All participants see bracket updates instantly.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="card text-center group hover:border-primary-500 transition-all">
-              <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">🔄</div>
-              <h3 className="text-2xl font-bold text-white mb-3 font-display">Grand Finals Reset</h3>
-              <p className="text-dark-400 leading-relaxed">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              className="card text-center group"
+            >
+              <div className="text-6xl mb-6 text-blood mx-auto group-hover:scale-110 transition-transform" style={{ textShadow: '0 0 20px #8B0000' }}>🔄</div>
+              <h3
+                className="text-2xl font-bold text-text mb-3"
+                style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+              >
+                Grand Finals Reset
+              </h3>
+              <p className="text-text-muted leading-relaxed">
                 Lucky Loser rule: Losers bracket winner forces a Grand Finals reset if they win.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-dark-950 py-8 text-center text-dark-500 text-sm border-t border-dark-800">
+      <footer className="py-8 text-center text-text-muted text-sm border-t border-blood/20 backdrop-blur-sm" style={{ background: 'rgba(13, 13, 13, 0.8)' }}>
         <p className="mb-2">Built with React + Vite + Supabase + Tailwind CSS</p>
-        <p>Double Elimination Tournament System • 2025</p>
+        <p className="text-gold">Double Elimination Tournament System • 2025</p>
       </footer>
     </div>
+    </>
   );
 }
 

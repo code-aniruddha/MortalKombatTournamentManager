@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { FaPlus, FaMinus, FaFistRaised, FaTrophy } from 'react-icons/fa';
 import { createTournament, addPlayers, initializeBracket, updateTournamentStatus, autoResolveByes } from '../lib/api';
 import { getNextPowerOfTwo } from '../lib/tournamentEngine';
+import PS5ControllerBackground from './PS5ControllerBackground';
+import LoadingScreen from './LoadingScreen';
 
 interface TournamentSetupProps {
   onTournamentCreated: (tournamentId: string) => void;
@@ -97,33 +101,80 @@ export default function TournamentSetup({ onTournamentCreated }: TournamentSetup
   const powerOfTwo = getNextPowerOfTwo(playerNames.filter(n => n.trim()).length);
   const byesNeeded = powerOfTwo - playerNames.filter(n => n.trim()).length;
 
+  if (loading) {
+    return <LoadingScreen message="Creating Tournament..." />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 p-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="font-display text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-primary-400 to-accent-500 mb-4">
-            MORTAL KOMBAT
-          </h1>
-          <p className="font-display text-3xl text-accent-400 tracking-wider">TOURNAMENT MANAGER</p>
-          <div className="mt-6 h-1.5 w-48 bg-gradient-to-r from-transparent via-primary-500 to-transparent mx-auto rounded-full"></div>
-        </div>
+    <>
+      <PS5ControllerBackground />
+      <div className="min-h-screen p-8 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="text-center mb-12"
+          >
+            <h1
+              className="text-8xl font-black mb-4"
+              style={{
+                fontFamily: 'Bebas Neue, sans-serif',
+                color: '#8B0000',
+                textShadow: '0 0 40px rgba(139, 0, 0, 0.8), 0 0 80px rgba(139, 0, 0, 0.5)'
+              }}
+            >
+              MORTAL KOMBAT
+            </h1>
+            <p
+              className="text-4xl mb-6"
+              style={{
+                fontFamily: 'Bebas Neue, sans-serif',
+                color: '#C5A059',
+                letterSpacing: '0.15em'
+              }}
+            >
+              TOURNAMENT MANAGER
+            </p>
+            <div
+              className="mt-6 h-1 w-48 mx-auto rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, transparent, #00FF41, transparent)',
+                boxShadow: '0 0 20px #00FF41'
+              }}
+            />
+          </motion.div>
 
-        {/* Setup Form */}
-        <div className="card p-10 shadow-2xl">
-          <h2 className="font-display text-4xl font-bold text-white mb-8 text-center">Create Tournament</h2>
+          {/* Setup Form */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="card p-10 shadow-2xl"
+          >
+            <h2
+              className="text-5xl font-bold text-text mb-8 text-center"
+              style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.1em' }}
+            >
+              <FaFistRaised className="inline-block mr-3 text-blood" />
+              Create Tournament
+            </h2>
 
-          {error && (
-            <div className="bg-primary-900/50 border-2 border-primary-500 text-white px-5 py-4 rounded-lg mb-6 flex items-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              <span>{error}</span>
-            </div>
-          )}
+            {error && (
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="border-2 border-blood text-text px-5 py-4 rounded-lg mb-6 flex items-center gap-3 glass-dark"
+              >
+                <span className="text-2xl">⚠️</span>
+                <span>{error}</span>
+              </motion.div>
+            )}
 
-          <form onSubmit={handleCreateTournament} className="space-y-8">
+            <form onSubmit={handleCreateTournament} className="space-y-8">
             {/* Tournament Name */}
             <div>
-              <label className="block text-white font-semibold mb-3 text-lg">
+              <label className="block text-text font-semibold mb-3 text-lg">
                 Tournament Name
               </label>
               <input
@@ -139,23 +190,34 @@ export default function TournamentSetup({ onTournamentCreated }: TournamentSetup
             {/* Players */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <label className="block text-white font-semibold text-lg">
-                  Fighters <span className="text-accent-500">({playerNames.filter(n => n.trim()).length})</span>
+                <label className="block text-text font-semibold text-lg">
+                  Fighters <span className="text-soul">({playerNames.filter(n => n.trim()).length})</span>
                 </label>
-                <button
+                <motion.button
                   type="button"
                   onClick={addPlayerField}
-                  className="btn-secondary text-sm"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-secondary text-sm inline-flex items-center gap-2"
                 >
-                  + Add Fighter
-                </button>
+                  <FaPlus /> Add Fighter
+                </motion.button>
               </div>
 
               <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                 {playerNames.map((name, index) => (
-                  <div key={index} className="flex gap-3">
+                  <motion.div
+                    key={index}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex gap-3"
+                  >
                     <div className="relative flex-1">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-500 font-bold">
+                      <div
+                        className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-blood"
+                        style={{ fontFamily: 'Bebas Neue, sans-serif' }}
+                      >
                         #{index + 1}
                       </div>
                       <input
@@ -167,76 +229,118 @@ export default function TournamentSetup({ onTournamentCreated }: TournamentSetup
                       />
                     </div>
                     {playerNames.length > 2 && (
-                      <button
+                      <motion.button
                         type="button"
                         onClick={() => removePlayer(index)}
-                        className="px-4 py-3 bg-dark-800 text-dark-400 rounded-lg hover:bg-primary-900 hover:text-primary-400 transition-all border border-dark-700"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="px-4 py-3 bg-obsidian-light text-text-muted rounded-lg hover:bg-blood hover:text-text transition-all border border-obsidian-light"
                       >
-                        ✕
-                      </button>
+                        <FaMinus />
+                      </motion.button>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
 
             {/* Info Box */}
-            <div className="bg-gradient-to-r from-accent-950 to-dark-900 border-2 border-accent-700 p-6 rounded-xl">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="border-2 border-gold p-6 rounded-xl"
+              style={{ background: 'linear-gradient(135deg, rgba(197, 160, 89, 0.1), rgba(13, 13, 13, 0.5))' }}
+            >
               <div className="flex items-start gap-3 mb-3">
                 <span className="text-2xl">ℹ️</span>
                 <div>
-                  <p className="text-white font-semibold mb-2">
-                    <span className="text-accent-400">Bracket Size:</span> {powerOfTwo} players
+                  <p className="text-text font-semibold mb-2">
+                    <span className="text-gold">Bracket Size:</span> {powerOfTwo} players
                   </p>
                   {byesNeeded > 0 && (
-                    <p className="text-dark-300 text-sm mb-2">
+                    <p className="text-text-muted text-sm mb-2">
                       {byesNeeded} "BYE" player{byesNeeded > 1 ? 's' : ''} will be added automatically
                       to reach the next power of 2.
                     </p>
                   )}
-                  <p className="text-dark-300 text-sm">
+                  <p className="text-text-muted text-sm">
                     Double Elimination: Players are eliminated after 2 losses
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Submit Button */}
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               className="btn-primary w-full text-2xl py-5"
+              style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.1em' }}
             >
-              {loading ? 'CREATING TOURNAMENT...' : 'START TOURNAMENT'}
-            </button>
+              {loading ? 'CREATING TOURNAMENT...' : '⚔️ START TOURNAMENT'}
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
 
         {/* Info Section */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card border-l-4 border-primary-500 hover:shadow-lg hover:shadow-primary-900/30 transition-all">
-            <div className="text-3xl mb-3">🏆</div>
-            <h3 className="font-display text-xl text-accent-400 font-bold mb-3">WINNERS BRACKET</h3>
-            <p className="text-dark-400 text-sm leading-relaxed">
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="card border-l-4 border-blood"
+          >
+            <FaTrophy className="text-4xl mb-3 text-gold" />
+            <h3
+              className="text-2xl text-gold font-bold mb-3"
+              style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+            >
+              WINNERS BRACKET
+            </h3>
+            <p className="text-text-muted text-sm leading-relaxed">
               Stay here as long as you keep winning. One loss drops you to Losers Bracket.
             </p>
-          </div>
-          <div className="card border-l-4 border-accent-500 hover:shadow-lg hover:shadow-accent-900/30 transition-all">
-            <div className="text-3xl mb-3">⚔️</div>
-            <h3 className="font-display text-xl text-accent-400 font-bold mb-3">LOSERS BRACKET</h3>
-            <p className="text-dark-400 text-sm leading-relaxed">
+          </motion.div>
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="card border-l-4 border-soul"
+          >
+            <div className="text-4xl mb-3">⚔️</div>
+            <h3
+              className="text-2xl text-soul font-bold mb-3"
+              style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+            >
+              LOSERS BRACKET
+            </h3>
+            <p className="text-text-muted text-sm leading-relaxed">
               Second chance for redemption. One more loss and you're eliminated.
             </p>
-          </div>
-          <div className="card border-l-4 border-green-500 hover:shadow-lg hover:shadow-green-900/30 transition-all">
-            <div className="text-3xl mb-3">👑</div>
-            <h3 className="font-display text-xl text-accent-400 font-bold mb-3">GRAND FINALS</h3>
-            <p className="text-dark-400 text-sm leading-relaxed">
+          </motion.div>
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="card border-l-4 border-gold"
+          >
+            <div className="text-4xl mb-3">👑</div>
+            <h3
+              className="text-2xl text-blood font-bold mb-3"
+              style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.05em' }}
+            >
+              GRAND FINALS
+            </h3>
+            <p className="text-text-muted text-sm leading-relaxed">
               Winner from each bracket faces off. Bracket reset if Loser's winner wins!
             </p>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
+    </>
   );
-}
+  }

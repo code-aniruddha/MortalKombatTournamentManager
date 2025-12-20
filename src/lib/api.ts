@@ -591,3 +591,55 @@ export async function getMatchWithPlayers(matchId: string) {
 
   return { match: data, error };
 }
+
+// =====================================================
+// PLAYER MANAGEMENT OPERATIONS
+// =====================================================
+
+/**
+ * Update player name
+ */
+export async function updatePlayerName(
+  playerId: string,
+  newName: string
+): Promise<{ success: boolean; error: any }> {
+  const { error } = await supabase
+    .from('players')
+    .update({ name: newName })
+    .eq('id', playerId);
+
+  return { success: !error, error };
+}
+
+/**
+ * Assign BYE to a specific player
+ */
+export async function assignByeToPlayer(
+  playerId: string,
+  isBye: boolean
+): Promise<{ success: boolean; error: any }> {
+  const { error } = await supabase
+    .from('players')
+    .update({ is_bye: isBye })
+    .eq('id', playerId);
+
+  return { success: !error, error };
+}
+
+/**
+ * Eliminate a player (mark as eliminated - implementation depends on requirements)
+ */
+export async function eliminatePlayer(
+  playerId: string
+): Promise<{ success: boolean; error: any }> {
+  // This could be implemented by:
+  // 1. Adding an 'eliminated' column to players table
+  // 2. Or removing them from active matches
+  // For now, we'll use a soft delete approach by updating a flag
+  const { error } = await supabase
+    .from('players')
+    .update({ is_bye: true, name: 'ELIMINATED' })
+    .eq('id', playerId);
+
+  return { success: !error, error };
+}
